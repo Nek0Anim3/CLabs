@@ -14,7 +14,7 @@ User* create_user_list(int count) {
     if (!users) return NULL;
     // Заповнюємо дані користувачів
     // UPD: Виправлено умову циклу for.
-    // Було i <= count , лічильник йде від 0, тому <= це +1 зайва ітерація, викликало Heap Buffer Overflow 
+    // Було i <= count , лічильник іде від 0, тому <= це +1 зайва ітерація, викликало Heap Buffer Overflow 
     for (int i = 0; i < count; i++) {
     users[i].id = i + 1;
     snprintf(users[i].name, sizeof(users[i].name), "User_%d", i + 1);
@@ -30,7 +30,7 @@ void process_users() {
 
     printf("Створено користувачів: %d\n", count);
 
-    // free(users); // Пам'ять звільнено, а після printf() одразу звертається до цих самих елементів. Помилка Use-after-free 
+    free(users); // Пам'ять звільнено, а після printf() одразу звертається до цих самих елементів. Помилка Use-after-free 
     
     printf("Перший користувач: ID=%d, Name=%s\n", users[0].id, users[0].name);
 

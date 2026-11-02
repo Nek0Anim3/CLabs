@@ -6,7 +6,7 @@ void Calculations(int *a, int *b, float *c) {
     int sum = (*a) + (*b) + (*c);
     int exp = (*a) * (*b) * (*c);
     float cosRes = cosf(sum); 
- 
+    int bbb = 0;
     *a = sum;
     *b = exp;
     *c = cosRes;

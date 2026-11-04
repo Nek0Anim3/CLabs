@@ -1,46 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
-int main(void) {
+#include <getopt.h>
+#include <stdbool.h>
+#include <unistd.h>
 
-	size_t arrSize = 3; // локальна змінна
-    // локальна змінна (вказівник на купу)
-    int *arr = (int *)malloc(arrSize * sizeof(int)); 
+void printVersion() {
+    printf("PWD1 1.0.0\nАвтор Кузеванов Костянтин\n=)\n");
+}
 
+void printHelp() {
+    printf("Використання pwd1 [-h -v -L -P]\n================\nПрапори:\n-L --logical | Логiчний шлях до директорii\n-P --physical | Фiзичний шлях до директорii\n-h --help | Допомога\n-v --version | Версiя продукту\n");
+}
 
-    for (int i = 0; i < arrSize ; ++i) {
-		arr[i] = i * 10; // заповнення
-    }
-    // print
-	printf("[STACK] Змінна arrSize: %p\n[STACK] Змінна *arr: %p\n[HEAP] Адреса масиву: %p\n", &arrSize, &arr, arr);
-
-
-    size_t newSize = arrSize + 2;
-    int *temp = (int *)realloc(arr, newSize * sizeof(int));
-
-    if (temp == NULL) {
-      free(arr);
-	  return 1;
-    }
+void printPath(bool isPhysical, char *buf, size_t bufSize) {
+      char *lPath = getenv("PWD");
+      if (lPath != NULL && isPhysical == false) {
+          printf("%s\n", lPath);
+          return;
+      }
     
-    arr = temp;
-    
-    printf("\n\n[HEAP] Адреса після realloc(): %p\n", arr);
-    for (size_t i = arrSize; i < newSize; i++)
-    {
-        arr[i] = 10*i;
-    }
-    
-    arrSize = newSize;
+      getcwd(buf, bufSize);
+      printf("%s\n", buf);
+}
 
-    printf("\n\n Адреси елементів масиву\n");
-	for (size_t i = 0; i < arrSize; i++)
-    {
-        printf("arr[%d] = %d | Адреса: %p\n", i, arr[i], &arr[i]);
-    }
+int main(int argc, char *argv[]) {
+    int opt = 0;
+    char printbuffer[1024];
     
-    free(arr);
-    arr = NULL;
-
-	
-	return 0;
+    
+    const char *shortOpts = "vhLP";
+    const struct option longOpts[] = {
+        {"version", no_argument, NULL, 'v'},
+        {"help", no_argument, NULL, 'h'},
+        {"logical", no_argument, NULL, 'L'},
+        {"physical", no_argument, NULL, 'P'}
+    };
+    while ((opt = getopt_long(argc, argv, shortOpts, longOpts, NULL)) != -1) {
+        switch (opt)
+        {
+        case 'v':
+            printVersion();
+            break;
+        case 'h':
+            printHelp();
+            break;
+        case 'L':
+            printPath(false, printbuffer, sizeof(printbuffer));
+            break;
+        case 'P':
+            printPath(true, printbuffer, sizeof(printbuffer));
+            break;
+        default:
+            printHelp();
+            break;
+        }
+        break;
+    }
+    //якщо без аргументу
+    if (opt == -1) {
+        printPath(false, printbuffer, sizeof(printbuffer));
+    }
+    return 0;
 }

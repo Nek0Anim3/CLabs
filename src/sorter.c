@@ -80,7 +80,7 @@ int copy_file(const char *src_path, const char *dst_path) {
 }
 
 
-void process_directory(const char *src_dir, const char *out_dir) {
+void process_directory(const char *src_dir, const char *out_dir, FILE *logFile) {
     DIR *dir = opendir(src_dir);
     if (!dir) {
         printf("Не вдалося відкрити директорію\n");
@@ -109,7 +109,7 @@ void process_directory(const char *src_dir, const char *out_dir) {
                     continue;
                 }
             }
-            process_directory(full_src_path, out_dir);
+            process_directory(full_src_path, out_dir, logFile);
         } else if (S_ISREG(st.st_mode)) {
             const char *category = get_category(entry->d_name);
 
@@ -122,7 +122,9 @@ void process_directory(const char *src_dir, const char *out_dir) {
             char full_dst_path[PATH_MAX];
             snprintf(full_dst_path, sizeof(full_dst_path), "%s/%s", category_dir, entry->d_name);
 
-            printf("> %s -> %s/\n", entry->d_name, category);
+            fprintf(logFile, "> %s -> %s\n", full_src_path, full_dst_path);
+            printf("> %s -> %s\n", full_src_path, full_dst_path);
+           
             copy_file(full_src_path, full_dst_path);
         }
     }
@@ -142,7 +144,11 @@ int main(int argc, char *argv[]) {
     if (ensure_dir(out_dir) != 0) {
         return 1;
     }
-
-    process_directory(src_dir, out_dir);
+    char *log_path = strdup(out_dir);
+    strcat(log_path, "/sort_result.log");
+    FILE *fd = fopen(log_path, "w");
+    process_directory(src_dir, out_dir, fd);
+    fclose(fd);
+    printf("Історія сортування записана в лог: %s\n", log_path);
     return 0;
 }

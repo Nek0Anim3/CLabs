@@ -12,6 +12,9 @@ int isDotDir(char *name) {
     }
 }
 
+int file_count = 0;
+int dir_count = 0;
+
 void printTree(const char *base_path, const char *prefix) {
     DIR *dir = opendir(base_path);
     if (!dir) {
@@ -32,7 +35,6 @@ void printTree(const char *base_path, const char *prefix) {
         if (isDotDir(entry->d_name)) {
             continue;
         }
-
         current++;
         int isLast = (current == count);
         printf("%s%s%s\n", prefix, isLast ? "└── " : "├── ", entry->d_name);
@@ -42,8 +44,11 @@ void printTree(const char *base_path, const char *prefix) {
         struct stat statbuf;
         if (stat(path, &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
             char new_prefix[1024];
+            dir_count++; 
             snprintf(new_prefix, sizeof(new_prefix), "%s%s", prefix, isLast ? "    " : "│   ");
             printTree(path, new_prefix);
+        } else {
+            file_count++;
         }
     }
 
@@ -56,6 +61,6 @@ int main(int argc, char *argv[]) {
     const char *target_dir = (argc > 1) ? argv[1] : currentDir;
     printf("%s\n", target_dir);
     printTree(target_dir, "");
-    
+    printf("Files: %d | Folders: %d\n", file_count, dir_count);
     return 0;
 }
